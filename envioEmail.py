@@ -14,13 +14,7 @@ login = input("Digite o e-mail para login: ")
 password = pwinput.pwinput("Digite a senha: ")
 
 # Realiza conexão do email com servidor SMTP
-try:
-    server = smtp.SMTP('smtp-mail.outlook.com', 587)
-    server.ehlo()
-    server.starttls()
-    server.login(login, password)
-except smtp.SMTPAuthenticationError as err:
-    print("Login ou senha inválidos, tente novamente")
+
 
 # Estrutura do e-mail 
 
@@ -37,7 +31,7 @@ body = """
             Fico no aguardo de um breve retorno.</br>
             Obrigada.</p>
             </br>
-            <img src="cid:0" alt="Image not found">
+            <img src="cid:0" alt="Assinatura">
         </body>
     </html>
 """
@@ -51,27 +45,32 @@ signature = open('ASS_GUILHERME_SAMPAIO.png', "rb")
 msg_signature = MIMEImage(signature.read())
 signature.close()
 msg_signature.add_header('Content-ID', '0')
-email_msg.attach(msg_signature)
+
 
 # Loop para envio de e-mails
-emailsSend = 0
+emails_send = 0
 for i in range(excelSheet.__len__()):
+    server = smtp.SMTP('smtp-mail.outlook.com', 587)
+    server.ehlo()
+    server.starttls() # Torna a conexão segura
+    server.login(login, password)
+
     if excelSheet.__len__() <= 0: # Condição para o código parar se a planilha do excel for zerada
         break
-    if emailsSend >= 2: # Condição para o script mandar uma determinada quantidade de emails e pausar por um determinado tempo
-        emailsSend = 0 
+    if emails_send >= 1: # Condição para o script mandar uma determinada quantidade de emails e pausar por um determinado tempo
+        emails_send = 0 
         excelSheet.to_excel("teste.xlsx", index=False)
-        time.sleep(300) 
+        time.sleep(10) 
+    '''emailTo = ""
     emailTo = excelSheet.loc[i, "E-mail"]
-    name = excelSheet.loc[i, "Nome"]
-    print(emailTo, name)
-    emailTo = excelSheet.loc[i, "E-mail"]
-    name = excelSheet.loc[i, "Nome"]
-    email_msg['To'] = str(emailTo)
-    email_msg['Subject'] = "Parceria Brico Bread c/ " + name
+    name = excelSheet.loc[i, "Nome"]'''
+    email_msg['To'] = excelSheet.loc[i, "E-mail"]
+    email_msg['Subject'] = "Parceria Brico Bread c/ " + excelSheet.loc[i, "Nome"]
+    print(excelSheet.loc[i, "E-mail"], excelSheet.loc[i, "Nome"])
     server.sendmail(email_msg['From'], email_msg['To'], email_msg.as_string())
-    emailsSend = emailsSend + 1
+    emails_send = emails_send + 1
     excelSheet = excelSheet.drop(i) # Deleta a linha do e-mail enviado
+    server.quit() # Desconecta do servidor SMTP
+    
+excelSheet.to_excel("teste.xlsx", index=False) # Atualiza na planilha todas as linhas que foram deletadas 
 
-excelSheet.to_excel("teste.xlsx", index=False) # Atualiza na planilha todas as linhas que foram deletadas
-server.quit() # Desconecta do servidor SMTP 
