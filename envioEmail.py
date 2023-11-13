@@ -10,8 +10,8 @@ import pwinput
 excelSheet = pd.read_excel("teste.xlsx")
 
 # Ler as informações de login do usuário
-login = "guilherme.sampaio324@hotmail.com"#input("Digite o e-mail para login: ")
-password = "futy33d9"#pwinput.pwinput("Digite a senha: ")
+login = input("Digite o e-mail para login: ")
+password = pwinput.pwinput("Digite a senha: ")
 
 # Realiza conexão do email com servidor SMTP
 try:
